@@ -11,4 +11,4 @@ RUN playwright install chromium --with-deps
 
 COPY . .
 
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "scraper:app", "--host", "0.0.0.0", "--port", "8000"]
