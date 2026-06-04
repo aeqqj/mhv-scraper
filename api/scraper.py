@@ -17,6 +17,8 @@ def scrape_site(page, site_url):
     results = []
 
     for listing in listings: 
+        url = listing.query_selector("a.house-preview")
+        href = url.get_attribute("href") if url else None
         image = listing.query_selector("img.house-img")
         address = listing.query_selector("div.house-address a")
         price = listing.query_selector("span.house-price")
@@ -26,6 +28,7 @@ def scrape_site(page, site_url):
         sqft  = spans[2]
 
         results.append({
+            "URL": f"https://mountainhomesvail.com{href}" if href else None,
             "Image": image.get_attribute("src") if image else None,
             "Price": price.inner_text().strip() if price else None,
             "Address": address.inner_text().strip() if address else None,
