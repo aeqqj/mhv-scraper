@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
-
 app = FastAPI()
-
 def scrape_site(page, site_url):
     page.goto(site_url)
     page.wait_for_load_state("networkidle")
@@ -11,21 +9,18 @@ def scrape_site(page, site_url):
         page.wait_for_selector("div.house-item", timeout=10000)
     except:
         return []
-
     listings = page.query_selector_all("div.house-item")
     results = []
-
-    for listing in listings:
+    for listing in listings: 
         url = listing.query_selector("a.house-preview")
         href = url.get_attribute("href") if url else None
         image = listing.query_selector("img.house-img")
         address = listing.query_selector("div.house-address a")
         price = listing.query_selector("span.house-price")
         spans = listing.query_selector_all("div.house-basic span")
-        beds  = spans[0] if len(spans) > 0 else None
-        baths = spans[1] if len(spans) > 1 else None
-        sqft  = spans[2] if len(spans) > 2 else None
-
+        beds  = spans[0]
+        baths = spans[1]
+        sqft  = spans[2]
         results.append({
             "URL": f"https://mountainhomesvail.com{href}" if href else None,
             "Image": image.get_attribute("src") if image else None,
@@ -35,9 +30,7 @@ def scrape_site(page, site_url):
             "Baths": baths.inner_text().strip() if baths else None,
             "Sqft": sqft.inner_text().strip() if sqft else None,
         })
-
     return results
-
 @app.get("/scrape")
 def scrape():
     with sync_playwright() as p:
@@ -51,5 +44,4 @@ def scrape():
         Stealth()
         results = scrape_site(page, "https://mountainhomesvail.com/vailsexquisite")
         browser.close()
-
-    return {"results": results}
+    return {"vailsexquisite": results}
