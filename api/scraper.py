@@ -7,7 +7,6 @@ app = FastAPI()
 def scrape_site(page, site_url):
     page.goto(site_url)
     page.wait_for_load_state("networkidle")
-
     try:
         page.wait_for_selector("div.house-item", timeout=10000)
     except:
@@ -16,16 +15,16 @@ def scrape_site(page, site_url):
     listings = page.query_selector_all("div.house-item")
     results = []
 
-    for listing in listings: 
+    for listing in listings:
         url = listing.query_selector("a.house-preview")
         href = url.get_attribute("href") if url else None
         image = listing.query_selector("img.house-img")
         address = listing.query_selector("div.house-address a")
         price = listing.query_selector("span.house-price")
         spans = listing.query_selector_all("div.house-basic span")
-        beds  = spans[0]
-        baths = spans[1]
-        sqft  = spans[2]
+        beds  = spans[0] if len(spans) > 0 else None
+        baths = spans[1] if len(spans) > 1 else None
+        sqft  = spans[2] if len(spans) > 2 else None
 
         results.append({
             "URL": f"https://mountainhomesvail.com{href}" if href else None,
@@ -52,4 +51,5 @@ def scrape():
         Stealth()
         results = scrape_site(page, "https://mountainhomesvail.com/vailsexquisite")
         browser.close()
-    return {"vailsexquisite": results}
+
+    return {"results": results}
