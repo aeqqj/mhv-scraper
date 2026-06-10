@@ -31,6 +31,7 @@ def scrape_site(page, site_url):
             "Sqft": sqft.inner_text().strip() if sqft else None,
         })
     return results
+
 @app.get("/scrape")
 def scrape():
     with sync_playwright() as p:
@@ -38,10 +39,17 @@ def scrape():
             headless=True,
             args=["--no-sandbox", "--disable-dev-shm-usage"]
         )
-        page = browser.new_context(
+        context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        ).new_page()
-        Stealth()
-        results = scrape_site(page, "https://mountainhomesvail.com/vailsexquisite")
-        browser.close()
+        )
+        stealth = Stealth()
+        page = context.new_page()
+        stealth.apply_stealth_sync(page)
+
+        try:
+            results = scrape_site(page, "https://mountainhomesvail.com/vailsexquisite")
+        finally:
+            context.close()
+            browser.close()
+
     return {"vailsexquisite": results}
